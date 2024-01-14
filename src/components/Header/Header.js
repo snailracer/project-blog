@@ -1,3 +1,4 @@
+'use client'
 import React from 'react';
 import clsx from 'clsx';
 import { Rss, Sun, Moon } from 'react-feather';
@@ -6,8 +7,32 @@ import Logo from '@/components/Logo';
 import VisuallyHidden from '@/components/VisuallyHidden';
 
 import styles from './Header.module.css';
+import Cookie from 'js-cookie';
 
-function Header({ theme, className, ...delegated }) {
+import { LIGHT_TOKENS, DARK_TOKENS, COLOUR_THEME_COOKIE_NAME } from '@/constants';
+
+function Header({ initialTheme, className, ...delegated }) {
+
+  const [theme, setTheme] = React.useState(initialTheme);
+
+  const handleToggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    Cookie.set(COLOUR_THEME_COOKIE_NAME, newTheme, {expires: 1000});
+
+    const newTokens = newTheme === 'light'
+    ? LIGHT_TOKENS
+        : DARK_TOKENS;
+
+    const root = document.documentElement;
+
+    root.setAttribute('data-colour-theme', newTheme);
+
+    Object.entries(newTokens).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
+    })
+
+  }
   return (
     <header
       className={clsx(styles.wrapper, className)}
@@ -28,8 +53,8 @@ function Header({ theme, className, ...delegated }) {
             View RSS feed
           </VisuallyHidden>
         </button>
-        <button className={styles.action}>
-          <Sun size="1.5rem" />
+        <button className={styles.action} onClick={handleToggleTheme}>
+          {theme === 'light' ? <Sun size="1.5rem" /> : <Moon size="1.5rem" />}
           <VisuallyHidden>
             Toggle dark / light mode
           </VisuallyHidden>
